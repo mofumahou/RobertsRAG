@@ -1,0 +1,29 @@
+# <---- API Server ---->
+fastapi
+uvicorn[standard]
+pydantic
+
+# <---- Document Ingestion ---->
+pymupdf
+langchain-text-splitters
+
+# <---- Retrieval / Search ---->
+rank-bm25
+
+# <---- Vector Store ---->
+chromadb
+
+# <---- Model Providers ---->
+openai
+
+# <---- Runtime Utilities ---->
+numpy
+python-dotenv
+httpx
+rich
+
+# <---- Dev Tooling ---->
+ruff
+
+# <---- Testing ---->
+pytest
