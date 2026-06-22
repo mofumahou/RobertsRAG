@@ -11,13 +11,12 @@
 # =====================================================
 data/raw/*
 data/processed/*
-storage/chroma/*
+db/chroma/*
 *.pdf
 *.sqlite3
 embeddings_cache/
 !data/raw/.gitkeep
-!data/processed/.gitkeep
-!storage/chroma/.gitkeep
+!db/chroma/.gitkeep
 
 # =====================================================
 # Python (FastAPI / Chroma / OpenAI backend)
