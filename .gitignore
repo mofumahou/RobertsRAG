@@ -73,6 +73,9 @@ build/
 
 # Vite / framework cache
 frontend/.vite/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 .vite/
 .next/
 .turbo/
