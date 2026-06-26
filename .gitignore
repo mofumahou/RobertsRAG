@@ -1,111 +1,53 @@
-# =====================================================
-# Secrets & environment
-# =====================================================
-.env
-.env.*
-!.env.example
-project-tree.txt
+# --- Operating system files ---
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# =====================================================
-# Corpus, vector store & generated artifacts
-# (do NOT commit copyrighted source text or derived data)
-# =====================================================
-data/raw/*
-data/processed/*
-db/chroma/*
-*.pdf
-*.sqlite3
-embeddings_cache/
-!data/raw/.gitkeep
-!db/chroma/.gitkeep
+# --- IDE / editor files ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# =====================================================
-# Python (FastAPI / Chroma / OpenAI backend)
-# =====================================================
+# --- Python ---
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Virtual environments
 .venv/
 venv/
-env/
 ENV/
+env/
+.env
 
-# Packaging / build
-build/
+# Build / cache artifacts
 dist/
+build/
 *.egg-info/
-.eggs/
-*.egg
-
-# Testing & coverage (pytest)
 .pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-coverage.xml
-.cache/
-
-# Linting / tooling (ruff)
-.ruff_cache/
 .mypy_cache/
+.ruff_cache/
+coverage/
 
-# Jupyter / notebooks (if used for experiments)
-.ipynb_checkpoints/
+# --- Backend ---
+backend/.env
+backend/.env.*
+!backend/.env.example
 
-# =====================================================
-# Node / React / TypeScript frontend
-# =====================================================
-# Dependencies
+# Vector store persistence (generated at runtime)
+backend/data/chroma/
+!backend/data/chroma/.gitkeep
+
+# Corpus files -
+backend/data/docs/*.txt
+!backend/data/docs/.gitkeep
+
+# --- Frontend ---
 frontend/node_modules/
-node_modules/
-.pnp
-.pnp.js
-.yarn/
-
-# Build output (Vite / CRA)
 frontend/dist/
-frontend/build/
-dist/
-build/
-
-# Vite / framework cache
-frontend/.vite/
+frontend/dist-ssr/
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
-.vite/
-.next/
-.turbo/
-
-# TypeScript incremental build info
-*.tsbuildinfo
-frontend/*.tsbuildinfo
-
-# Frontend env files
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
-
-# Package manager logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Optional caches
-.eslintcache
-
-# =====================================================
-# Editors & OS
-# =====================================================
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-desktop.ini
