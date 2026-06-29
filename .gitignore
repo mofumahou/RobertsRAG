@@ -42,6 +42,7 @@ backend/data/chroma/
 
 # Corpus files -
 backend/data/docs/*.txt
+backend/data/docs/*.epub
 !backend/data/docs/.gitkeep
 
 # --- Frontend ---
