@@ -7,6 +7,7 @@ pydantic
 ebooklib
 beautifulsoup4
 pymupdf
+markdownify
 langchain-core
 langchain-text-splitters
 
