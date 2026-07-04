@@ -12,11 +12,20 @@ from app.config import CORPUS_DIR, EPUB_DIR
 def process_epub(epub_path, output_dir):
     output_dir.mkdir(parents=True, exist_ok=True)
     book = epub.read_epub(str(epub_path))
+    document_ids_to_skip = ["pg-header", "cover", "item4", "item5", "ENDNOTE", "pg-footer", "ncx", "coverpage-wrapper"]
     
-    for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+    documents = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
+    for item in documents:
+        if item.get_id() in document_ids_to_skip:
+            continue
         content = item.get_content()
         output_file_path = output_dir / f"{item.get_name()}.html"
         output_file_path.write_bytes(content)
+        #print(f"Item ID: {item.get_id()} | Name: {item.get_name()}")
+
+def convert_html_to_markdown(html_content):
+    soup = BeautifulSoup(html_content, "html.parser").prettify()
+
 
 
 def main():
