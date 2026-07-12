@@ -2,7 +2,7 @@ import re
 import ebooklib
 from pathlib import Path
 from ebooklib import epub
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Comment
 ### from markdownify import markdownify as md
 
 from app.config import CORPUS_DIR, EPUB_DIR
@@ -11,6 +11,13 @@ from app.config import CORPUS_DIR, EPUB_DIR
 
 # Processes an EPUB file extracting only the core text and document data, saving 
 #   it as a list of dictionaries, each representing a chapter in the book.
+
+PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
+ARTICLE_RE = re.compile(r"^Art\.\s+([IVX]+)\.\s*(.+)", re.IGNORECASE)
+SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
+SUBSECTION_RE = re.compile(r"^\((\d+)\)\s+(.+)")
+CLAUSE_RE = re.compile(r"^\(([a-z])\)\s+(.+)")
+
 def extract_html_chapters(epub_path: Path
                           ) -> list[dict]:
     book = epub.read_epub(str(epub_path))
@@ -60,9 +67,20 @@ def clean_chapters(chapters: list[dict]
         
         for tag in soup.find_all(["script", "style", "hr", "table"]):
             tag.decompose()
+
+        for footnotes in soup.find_all("div", class_="footnotes"):
+            footnotes.decompose()
+
+        for anchor in soup.find_all("a", class_="fnanchor"):
+            anchor.decompose()
             
         for link in soup.find_all("a"):
             link.unwrap() 
+        
+        for header in soup.find_all(["h4", "h5"]):
+            header.unwrap()
+
+        clean_sections_helper(soup)
         
         chapter["soup"] = soup
             
@@ -70,18 +88,51 @@ def clean_chapters(chapters: list[dict]
 
 def clean_chapters_pageno_helper(soup: BeautifulSoup
                                  ) -> None:
-    for span in soup.find_all("span", class_="x-ebookmaker-pageno"):
+    for span in soup.find_all("span", class_=PAGE_SPAN_CLASS):
         page_id = span.get("id", "")
         match = re.search(r"Page_(\d+)", page_id)
-        if match:
-            page_number = match.group(1)
-            comment = f"\n<!-- page: {page_number} -->\n\n"
-        else:
-            comment = "\n\n"
-        if span.parent:
-            span.replace_with(comment)
+        if match and span.parent:
+            comment = Comment(f" page: {match.group(1)} ")
+            span.replace_with(NavigableString("\n\n"), comment, NavigableString("\n\n"))
         else:
             span.decompose()
+
+def clean_sections_helper(soup: BeautifulSoup
+                                 ) -> None:
+    for span in soup.select('p > b > span[id^="sec_"]'):
+        b = span.parent
+        if not b:
+            continue
+        p = b.parent
+        if not p:
+            continue
+
+        b_text = b.get_text(" ", strip=True)
+        match = SECTION_RE.match(b_text)
+        if not match:
+            continue
+
+        section_num, section_title = match.groups()
+        heading_text = f"{section_num}. {section_title}"
+        h4 = soup.new_tag("h4")
+        h4.string = heading_text
+
+        remaining_p_text = ""
+        for sibling in b.next_siblings:
+            if isinstance(sibling, NavigableString):
+                remaining_p_text += str(sibling)
+            else:
+                remaining_p_text += sibling.get_text(" ", strip=True)
+
+        remaining_p_text = remaining_p_text.strip()
+        p.insert_before(h4)
+        print(h4)
+
+        if remaining_p_text:
+            p.clear()
+            p.append(NavigableString(remaining_p_text))
+        else:
+            p.decompose()
             
     
 # <--------- CONVERT TO MARKDOWN ------------->
