@@ -73,6 +73,9 @@ def clean_chapters(chapters: list[dict]
 
         for anchor in soup.find_all("a", class_="fnanchor"):
             anchor.decompose()
+
+        for article in soup.find_all("h3"):
+            article.attrs = {}
             
         for link in soup.find_all("a"):
             link.unwrap() 
@@ -81,6 +84,9 @@ def clean_chapters(chapters: list[dict]
             header.unwrap()
 
         clean_sections_helper(soup)
+
+        for tag in soup.find_all(["span"]):
+            tag.unwrap()
         
         chapter["soup"] = soup
             
