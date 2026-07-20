@@ -2,7 +2,7 @@ import re
 import ebooklib
 from pathlib import Path
 from ebooklib import epub
-from bs4 import BeautifulSoup, NavigableString, Comment
+from bs4 import BeautifulSoup, NavigableString, Comment, Tag
 ### from markdownify import markdownify as md
 
 from app.config import CORPUS_DIR, EPUB_DIR
@@ -13,10 +13,9 @@ from app.config import CORPUS_DIR, EPUB_DIR
 #   it as a list of dictionaries, each representing a chapter in the book.
 
 PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
-ARTICLE_RE = re.compile(r"^Art\.\s+([IVX]+)\.\s*(.+)", re.IGNORECASE)
 SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
-SUBSECTION_RE = re.compile(r"^\((\d+)\)\s+(.+)")
-CLAUSE_RE = re.compile(r"^\(([a-z])\)\s+(.+)")
+# SUBSECTION_RE = re.compile(r"^\((\d+)\)\s+(.+)")
+SUBSECTION_RE = re.compile(r"^\s*\((\d+)\)\s*$")
 
 def extract_html_chapters(epub_path: Path
                           ) -> list[dict]:
@@ -55,8 +54,8 @@ def create_chapter_dictionary(chapter_id: str,
     print(f" Extracting:> Chapter ID: {chapter_dict['id']} | Name: {chapter_dict['name']} | Length: {len(chapter_dict['soup'].get_text())} characters")  # Prints the chapter id and name to the console for tracking progress
     return chapter_dict
 
+# <--------- HELPER FUNCTIONS ---------------->
 
-# <--------- TO WORK ON NEXT ---------------->
 def clean_chapters(chapters: list[dict]
                    ) -> list[dict]:
     # Strip out unwanted HTML tags,
@@ -84,11 +83,13 @@ def clean_chapters(chapters: list[dict]
             header.unwrap()
 
         clean_sections_helper(soup)
-
+        clean_subsections_helper(soup)
+        
         for tag in soup.find_all(["span"]):
             tag.unwrap()
         
         chapter["soup"] = soup
+
             
     return chapters
 
@@ -119,9 +120,8 @@ def clean_sections_helper(soup: BeautifulSoup
             continue
 
         section_num, section_title = match.groups()
-        heading_text = f"{section_num}. {section_title}"
         h4 = soup.new_tag("h4")
-        h4.string = heading_text
+        h4.string = f"{section_num}. {section_title}"
 
         remaining_p_text = ""
         for sibling in b.next_siblings:
@@ -139,7 +139,48 @@ def clean_sections_helper(soup: BeautifulSoup
             p.append(NavigableString(remaining_p_text))
         else:
             p.decompose()
-            
+
+# <--------- TO WORK ON NEXT ---------------->
+def clean_subsections_helper(soup: BeautifulSoup
+                             ) -> None:
+    for p in list(soup.find_all("p")):
+        contents = p.contents
+        if len(contents) < 2: continue
+        
+        first_child = contents[0]
+        second_child = contents[1]
+        if not isinstance(first_child, NavigableString): continue
+
+        match = SUBSECTION_RE.match(str(first_child))
+        if not match or not isinstance(second_child, Tag): continue
+
+        subsection_num = match.group(1)
+        subsection_title = second_child.get_text(" ", strip=True)
+
+        h5 = soup.new_tag("h5")
+        h5.string = f"({subsection_num}) {subsection_title}"
+
+        remaining_p_text = ""
+        for sibling in second_child.next_siblings:
+            if isinstance(sibling, NavigableString):
+                remaining_p_text += str(sibling)
+            else:
+                remaining_p_text += sibling.get_text(" ", strip=True)
+
+        remaining_p_text = remaining_p_text.strip()
+
+        p.insert_before(h5)
+
+        if remaining_p_text:
+            p.clear()
+            p.append(NavigableString(remaining_p_text))
+        else:
+            p.decompose()
+
+def clean_clauses_helper(soup: BeautifulSoup
+                             ) -> None:
+    return
+           
     
 # <--------- CONVERT TO MARKDOWN ------------->
 
