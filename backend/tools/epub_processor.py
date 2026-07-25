@@ -114,7 +114,7 @@ def clean_sections_helper(soup: BeautifulSoup
         if not p:
             continue
 
-        b_text = b.get_text(" ", strip=True)
+        b_text = " ".join(b.get_text().split())
         match = SECTION_RE.match(b_text)
         if not match:
             continue
@@ -123,22 +123,11 @@ def clean_sections_helper(soup: BeautifulSoup
         h4 = soup.new_tag("h4")
         h4.string = f"{section_num}. {section_title}"
 
-        remaining_p_text = ""
-        for sibling in b.next_siblings:
-            if isinstance(sibling, NavigableString):
-                remaining_p_text += str(sibling)
-            else:
-                remaining_p_text += sibling.get_text(" ", strip=True)
-
-        remaining_p_text = remaining_p_text.strip()
         p.insert_before(h4)
-        print(h4)
 
-        if remaining_p_text:
-            p.clear()
-            p.append(NavigableString(remaining_p_text))
-        else:
-            p.decompose()
+        b.decompose()
+
+        if not p.get_text(strip=True): p.decompose()
 
 # <--------- TO WORK ON NEXT ---------------->
 def clean_subsections_helper(soup: BeautifulSoup
@@ -155,27 +144,17 @@ def clean_subsections_helper(soup: BeautifulSoup
         if not match or not isinstance(second_child, Tag): continue
 
         subsection_num = match.group(1)
-        subsection_title = second_child.get_text(" ", strip=True)
+        subsection_title = " ".join(second_child.get_text().split())
 
         h5 = soup.new_tag("h5")
         h5.string = f"({subsection_num}) {subsection_title}"
 
-        remaining_p_text = ""
-        for sibling in second_child.next_siblings:
-            if isinstance(sibling, NavigableString):
-                remaining_p_text += str(sibling)
-            else:
-                remaining_p_text += sibling.get_text(" ", strip=True)
-
-        remaining_p_text = remaining_p_text.strip()
-
         p.insert_before(h5)
 
-        if remaining_p_text:
-            p.clear()
-            p.append(NavigableString(remaining_p_text))
-        else:
-            p.decompose()
+        first_child.extract()
+        second_child.decompose()
+
+        if not p.get_text(strip=True): p.decompose()
 
 def clean_clauses_helper(soup: BeautifulSoup
                              ) -> None:
