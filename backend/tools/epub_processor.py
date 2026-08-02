@@ -2,7 +2,7 @@ import re
 import ebooklib
 from pathlib import Path
 from ebooklib import epub
-from bs4 import BeautifulSoup, NavigableString, Comment, Tag
+from bs4 import BeautifulSoup, NavigableString, Comment, Tag, Doctype
 ### from markdownify import markdownify as md
 
 from app.config import CORPUS_DIR, EPUB_DIR
@@ -14,7 +14,6 @@ from app.config import CORPUS_DIR, EPUB_DIR
 
 PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
 SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
-# SUBSECTION_RE = re.compile(r"^\((\d+)\)\s+(.+)")
 SUBSECTION_RE = re.compile(r"^\s*\((\d+)\)\s*$")
 
 def extract_html_chapters(epub_path: Path
@@ -37,6 +36,8 @@ def extract_html_chapters(epub_path: Path
     for item in document:
         if item.get_id() not in document_ids_to_skip:
             soup = BeautifulSoup(item.get_content(), "html.parser")
+            body = soup.find("body")
+            if body: soup = body
             chapters.append(create_chapter_dictionary(item.get_id(), item.get_name(), soup))
     return chapters
 
@@ -62,31 +63,33 @@ def clean_chapters(chapters: list[dict]
     for chapter in chapters:
         soup = chapter["soup"]
 
+        # Convert page spans to soup comments
         clean_chapters_pageno_helper(soup)
-        
+
+        # Remove noise
         for tag in soup.find_all(["script", "style", "hr", "table"]):
             tag.decompose()
-
         for footnotes in soup.find_all("div", class_="footnotes"):
             footnotes.decompose()
-
         for anchor in soup.find_all("a", class_="fnanchor"):
             anchor.decompose()
 
-        for article in soup.find_all("h3"):
-            article.attrs = {}
-            
+        # Unwrap links and h4/h5 for a clean section/subsection template
         for link in soup.find_all("a"):
             link.unwrap() 
         
         for header in soup.find_all(["h4", "h5"]):
             header.unwrap()
 
+        clean_articles_helper(soup)
         clean_sections_helper(soup)
         clean_subsections_helper(soup)
-        
+
         for tag in soup.find_all(["span"]):
             tag.unwrap()
+
+        for tag in soup.find_all(True):  # every tag
+            tag.attrs = {}
         
         chapter["soup"] = soup
 
@@ -129,7 +132,6 @@ def clean_sections_helper(soup: BeautifulSoup
 
         if not p.get_text(strip=True): p.decompose()
 
-# <--------- TO WORK ON NEXT ---------------->
 def clean_subsections_helper(soup: BeautifulSoup
                              ) -> None:
     for p in list(soup.find_all("p")):
@@ -156,11 +158,18 @@ def clean_subsections_helper(soup: BeautifulSoup
 
         if not p.get_text(strip=True): p.decompose()
 
-def clean_clauses_helper(soup: BeautifulSoup
+def clean_articles_helper(soup: BeautifulSoup
                              ) -> None:
+    # extract title and replace h2 text with it
+    for article in list(soup.find_all("h2")): 
+        h2_title = article.attrs.get("title")
+        if h2_title is not None:
+            article.string = h2_title
+        else:
+            continue
     return
-           
-    
+
+  
 # <--------- CONVERT TO MARKDOWN ------------->
 
 # <--------- SAVE PROCESSED CHAPTERS --------->
