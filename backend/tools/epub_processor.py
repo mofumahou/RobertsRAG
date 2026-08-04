@@ -3,7 +3,7 @@ import ebooklib
 from pathlib import Path
 from ebooklib import epub
 from bs4 import BeautifulSoup, NavigableString, Comment, Tag, Doctype
-### from markdownify import markdownify as md
+from markdownify import markdownify as md
 
 from app.config import CORPUS_DIR, EPUB_DIR
 
@@ -92,9 +92,8 @@ def clean_chapters(chapters: list[dict]
             tag.attrs = {}
         
         chapter["soup"] = soup
-
-            
     return chapters
+
 
 def clean_chapters_pageno_helper(soup: BeautifulSoup
                                  ) -> None:
@@ -106,6 +105,7 @@ def clean_chapters_pageno_helper(soup: BeautifulSoup
             span.replace_with(NavigableString("\n\n"), comment, NavigableString("\n\n"))
         else:
             span.decompose()
+
 
 def clean_sections_helper(soup: BeautifulSoup
                                  ) -> None:
@@ -131,6 +131,7 @@ def clean_sections_helper(soup: BeautifulSoup
         b.decompose()
 
         if not p.get_text(strip=True): p.decompose()
+
 
 def clean_subsections_helper(soup: BeautifulSoup
                              ) -> None:
@@ -158,6 +159,7 @@ def clean_subsections_helper(soup: BeautifulSoup
 
         if not p.get_text(strip=True): p.decompose()
 
+
 def clean_articles_helper(soup: BeautifulSoup
                              ) -> None:
     # extract title and replace h2 text with it
@@ -169,8 +171,6 @@ def clean_articles_helper(soup: BeautifulSoup
             continue
     return
 
-  
-# <--------- CONVERT TO MARKDOWN ------------->
 
 # <--------- SAVE PROCESSED CHAPTERS --------->
 def save_chapters_as_markdown(chapters: list[dict], 
@@ -183,6 +183,9 @@ def save_chapters_as_markdown(chapters: list[dict],
         output_file = output_dir / f"{chapter['name']}.html"            #!!!!!!!!!!!!file extension MUST be changed to .md in finalized version of the pipeline
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(str(chapter["soup"]))
+        markdown_output_file = output_dir / f"{chapter['name']}.md"
+        with open(markdown_output_file, "w", encoding="utf-8") as f:
+            f.write(md(str(chapter["soup"]), heading_style="ATX"))
 
 
 def main() -> None:
@@ -197,13 +200,6 @@ def main() -> None:
     processed_chapters = clean_chapters(unprocessed_chapters)
     print(f"Processed {len(processed_chapters)} chapters from {epub_path.name}")
     save_chapters_as_markdown(processed_chapters, output_dir)
-
-
-### TO REMOVE ####
-
-##################
-
-    # chapters will be used to create a markdown version of the book in the next step of the pipeline
 
 
 if __name__ == "__main__":
