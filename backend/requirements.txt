@@ -4,7 +4,10 @@ uvicorn[standard]
 pydantic
 
 # <---- Document Ingestion ---->
+ebooklib
+beautifulsoup4
 pymupdf
+markdownify
 langchain-core
 langchain-text-splitters
 

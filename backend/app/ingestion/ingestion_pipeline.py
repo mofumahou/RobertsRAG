@@ -4,6 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 from pathlib import Path
+from tools.epub_processor import extract_html_chapters
 
 load_dotenv()
 
