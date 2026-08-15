@@ -46,11 +46,10 @@ def create_chapter_dictionary(chapter_id: str,
                               soup: BeautifulSoup
                               ) -> dict:
     chapter_dict = {
-        "id": chapter_id,
-        "name": chapter_name,
+        "epub_chapter_id": chapter_id,
+        "epub_chapter_name": chapter_name,
         "soup": soup
         }
-    print(f" Extracting:> Chapter ID: {chapter_dict['id']} | Name: {chapter_dict['name']} | Length: {len(chapter_dict['soup'].get_text())} characters")  # Prints the chapter id and name to the console for tracking progress
     return chapter_dict
 
 # Main formatter function
