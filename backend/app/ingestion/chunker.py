@@ -7,34 +7,14 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import CHUNK_OVERLAP, CHUNK_SIZE, CORPUS_NAME
+from backend.app.ingestion.models import Chunk, Context
 
 HEADING_LEVELS = {
-    "h2": "Part",
-    "h3": "Chapter",
-    "h4": "Section",
-    "h5": "Subsection",
+    "h2": "part",
+    "h3": "chapter",
+    "h4": "section",
+    "h5": "subsection",
 }
-
-@dataclass(frozen=True)
-class Context:
-    part: str=""
-    chapter: str=""
-    section: str=""
-    subsection: str=""
-
-@dataclass(frozen=True)
-class Chunk:
-    chunk_id: str
-    text: str
-    metadata: dict[str, Any]
-    chapter_id: str
-    chapter_name: str
-    chunk_index: int
-
-@dataclass(frozen=True)
-class EmbeddedChunk:
-    chunk: Chunk
-    embedding: list[float]
 
 def build_metadata(context: Context, 
                    chapter_id: str, 
