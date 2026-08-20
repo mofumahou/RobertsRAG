@@ -46,8 +46,8 @@ def create_chapter_dictionary(chapter_id: str,
                               soup: BeautifulSoup
                               ) -> dict:
     chapter_dict = {
-        "epub_chapter_id": chapter_id,
-        "epub_chapter_name": chapter_name,
+        "chapter_id": chapter_id,
+        "chapter_name": chapter_name,
         "soup": soup
         }
     return chapter_dict
@@ -190,10 +190,10 @@ def save_chapters(chapters: list[dict],
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for chapter in chapters:
-        output_file = output_dir / f"{chapter['name']}.html"
+        output_file = output_dir / f"{chapter['chapter_name']}.html"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(str(chapter["soup"]))
-        markdown_output_file = output_dir / f"{chapter['name']}.md"
+        markdown_output_file = output_dir / f"{chapter['chapter_name']}.md"
         with open(markdown_output_file, "w", encoding="utf-8") as f:
             f.write(md(str(chapter["soup"]), heading_style="ATX"))
     return
