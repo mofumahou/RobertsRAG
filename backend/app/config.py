@@ -2,6 +2,7 @@ from pathlib import Path
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 APP_NAME = "RobertsRAG"
+CORPUS_NAME = "Robert's Rules of Order, 1915 Edition"
 
 # <---- Paths ---->
 CORPUS_DIR = BACKEND_DIR / "data" / "docs" / "processed"

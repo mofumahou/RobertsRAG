@@ -13,6 +13,7 @@ from app.config import CORPUS_DIR, EPUB_DIR
 PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
 SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
 SUBSECTION_RE = re.compile(r"^\s*\((\d+)\)\s*$")
+CHAPTER_ID_RE = re.compile(r"h-\d{1,2}")
 
 # Pull the html content of each chapter in the EPUB file, returning a list of dictionaries
 def extract_html_chapters(epub_path: Path
@@ -36,8 +37,14 @@ def extract_html_chapters(epub_path: Path
         if item.get_id() not in document_ids_to_skip:
             soup = BeautifulSoup(item.get_content(), "html.parser")
             body = soup.find("body")
+
             if body: soup = body
-            chapters.append(create_chapter_dictionary(item.get_id(), item.get_name(), soup))
+
+            match = CHAPTER_ID_RE.search(item.get_name())
+            chapter_id = match.group(0) if match else item.get_id()
+
+            chapters.append(create_chapter_dictionary(chapter_id, item.get_name(), soup))
+            print(f"Extracted chapter {item.get_name()} with id {chapter_id}")
     return chapters
 
 # Creates a dictionary for each chapter in the EPUB file, preserving the chapter id, name, and content (as a BeautifulSoup object)
@@ -46,11 +53,10 @@ def create_chapter_dictionary(chapter_id: str,
                               soup: BeautifulSoup
                               ) -> dict:
     chapter_dict = {
-        "id": chapter_id,
-        "name": chapter_name,
+        "chapter_id": chapter_id,
+        "chapter_name": chapter_name,
         "soup": soup
         }
-    print(f" Extracting:> Chapter ID: {chapter_dict['id']} | Name: {chapter_dict['name']} | Length: {len(chapter_dict['soup'].get_text())} characters")  # Prints the chapter id and name to the console for tracking progress
     return chapter_dict
 
 # Main formatter function
@@ -191,10 +197,10 @@ def save_chapters(chapters: list[dict],
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for chapter in chapters:
-        output_file = output_dir / f"{chapter['name']}.html"
+        output_file = output_dir / f"{chapter['chapter_name']}.html"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(str(chapter["soup"]))
-        markdown_output_file = output_dir / f"{chapter['name']}.md"
+        markdown_output_file = output_dir / f"{chapter['chapter_name']}.md"
         with open(markdown_output_file, "w", encoding="utf-8") as f:
             f.write(md(str(chapter["soup"]), heading_style="ATX"))
     return
