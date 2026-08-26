@@ -13,6 +13,7 @@ from app.config import CORPUS_DIR, EPUB_DIR
 PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
 SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
 SUBSECTION_RE = re.compile(r"^\s*\((\d+)\)\s*$")
+CHAPTER_ID_RE = re.compile(r"h-\d{1,2}")
 
 # Pull the html content of each chapter in the EPUB file, returning a list of dictionaries
 def extract_html_chapters(epub_path: Path
@@ -36,8 +37,14 @@ def extract_html_chapters(epub_path: Path
         if item.get_id() not in document_ids_to_skip:
             soup = BeautifulSoup(item.get_content(), "html.parser")
             body = soup.find("body")
+
             if body: soup = body
-            chapters.append(create_chapter_dictionary(item.get_id(), item.get_name(), soup))
+
+            match = CHAPTER_ID_RE.search(item.get_name())
+            chapter_id = match.group(0) if match else item.get_id()
+
+            chapters.append(create_chapter_dictionary(chapter_id, item.get_name(), soup))
+            print(f"Extracted chapter {item.get_name()} with id {chapter_id}")
     return chapters
 
 # Creates a dictionary for each chapter in the EPUB file, preserving the chapter id, name, and content (as a BeautifulSoup object)
