@@ -14,6 +14,7 @@ PAGE_SPAN_CLASS = "x-ebookmaker-pageno"
 SECTION_RE = re.compile(r"^(\d+)\.\s+(.+)")
 SUBSECTION_RE = re.compile(r"^\s*\((\d+)\)\s*$")
 CHAPTER_ID_RE = re.compile(r"h-\d{1,2}")
+LAST_SEEN_H2_TEXT = ""
 
 # Pull the html content of each chapter in the EPUB file, returning a list of dictionaries
 def extract_html_chapters(epub_path: Path
@@ -124,11 +125,20 @@ def clean_articles_helper(soup: BeautifulSoup
 
 def clean_parts_helper(soup: BeautifulSoup
                        ) -> None:
-    # extract title and replace h2 text with it
-    for part in list(soup.find_all("h2")):
+    # extract title and replace h2 text with it or if there is no h2 inject the last one seen.
+    global LAST_SEEN_H2_TEXT
+    parts = list(soup.find_all("h2"))
+
+    if not parts:
+        h2 = soup.new_tag("h2")
+        h2.string = LAST_SEEN_H2_TEXT
+        soup.insert(0, h2)
+        return
+        
+    for part in parts:
         h2_title = part.attrs.get("title")
         if h2_title is not None:
-            part.string = h2_title.removesuffix(".")
+            LAST_SEEN_H2_TEXT = part.string = h2_title.removesuffix(".")
         else:
             continue
     return
