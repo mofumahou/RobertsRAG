@@ -23,9 +23,3 @@ class Context:
     article: str=""
     section: str=""
     subsection: str=""
-
-@dataclass(frozen=True)
-class ChapterDict:
-    chapter_id: str
-    chapter_name: str
-    soup: Soup
