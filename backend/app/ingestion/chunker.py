@@ -5,10 +5,9 @@ from typing import Any
 
 from bs4 import BeautifulSoup as Soup, Tag
 from langchain_text_splitters import RecursiveCharacterTextSplitter as Splitter
-from numpy import block
 
 from app.config import CHUNK_OVERLAP, CHUNK_SIZE, CORPUS_NAME
-from app.ingestion.models import ChapterDict, Chunk, Context
+from app.ingestion.models import Chunk, Context
 
 HEADING_LEVELS = {
     "h2": "part",
@@ -154,14 +153,14 @@ def chunk_chapter(soup: Soup,
     
     return chunks
 
-def chunk_chapters(chapters: list[ChapterDict],
+def chunk_chapters(chapters: list[dict],
                    source: str
                    ) -> list[Chunk]:
     chunks:list[Chunk] = []
     for chapter in chapters:
         chunks.extend(chunk_chapter(
-            chapter.soup,
-            chapter.chapter_id,
-            chapter.chapter_name,
+            chapter["soup"],
+            chapter["chapter_id"],
+            chapter["chapter_name"],
             source))
     return chunks
