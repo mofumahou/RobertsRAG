@@ -3,9 +3,7 @@ from openai import OpenAI
 from app.config import EMBEDDING_BATCH_SIZE, EMBEDDING_MODEL
 from app.ingestion.models import Chunk, EmbeddedChunk
 
-client = OpenAI()
-
-def embed_chunks(chunks: list[Chunk]
+def embed_chunks(chunks: list[Chunk], client: OpenAI
                  ) -> list[EmbeddedChunk]:
     embedded_chunks: list[EmbeddedChunk] = []
 
