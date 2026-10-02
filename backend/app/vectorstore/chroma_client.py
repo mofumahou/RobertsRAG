@@ -7,11 +7,17 @@ from app.config import (
 )
 from app.ingestion.models import EmbeddedChunk
 
+# Initialize a persistent ChromaDB client
 client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
 
+# Create a collection, and upsert the embedded chunks into the collection
 def store_chunks(embedded_chunks: list[EmbeddedChunk]
                  ) -> None:
-    collection = client.get_or_create_collection(
+    
+    # Temporary workaround to ensure the collection is created fresh each time
+    client.get_or_create_collection(name=CHROMA_COLLECTION)
+    client.delete_collection(name=CHROMA_COLLECTION)
+    collection = client.create_collection(
         name=CHROMA_COLLECTION,
         configuration={"hnsw": {"space": "cosine"}})
 

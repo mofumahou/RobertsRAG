@@ -139,7 +139,9 @@ def chunk_chapter(soup: Soup,
             continue
 
         element_text = " ".join(element.get_text(separator=" ", strip=True).split())
-        if element_text:
+        is_part_subtitle = (not context.article
+                            and context.part.endswith(element_text.rstrip(".")))
+        if element_text and not is_part_subtitle:
             block_text += f"\n\n{element_text}"
 
     chunks.extend(build_chunks(
