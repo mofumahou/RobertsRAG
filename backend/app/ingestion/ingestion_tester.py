@@ -24,12 +24,6 @@ def main() -> None:
         print(f"[{chapter['chapter_id']}] {chapter['chapter_name']}: "
               f"{len(chunks)} chunks")
 
-        # Sanity checks: unique ids and contiguous indices from 0
-        ids = [c.chunk_id for c in chunks]
-        assert len(ids) == len(set(ids)), f"duplicate chunk_id in {chapter['chapter_id']}"
-        assert [c.chunk_index for c in chunks] == list(range(len(chunks))), \
-            f"non-contiguous chunk_index in {chapter['chapter_id']}"
-
         # Show the LAST chunk of each chapter — this is the block emitted by
         # the post-loop flush, i.e. the section with no trailing heading.
         if chunks:

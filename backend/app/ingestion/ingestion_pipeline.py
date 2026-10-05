@@ -14,6 +14,9 @@ def main() -> None:
     # Temporary pipeline for processing the EPUB, chunking, embedding, and storing in Chroma
     # Runs fine so far, pending furter documentation
     epub_path = next(EPUB_DIR.glob("*.epub"), None)
+    if epub_path is None:
+        raise FileNotFoundError(f"No EPUB files found in {EPUB_DIR}")
+    
     chapters = clean_chapters(extract_html_chapters(epub_path))
     print(f"Processed {len(chapters)} chapters from {epub_path.name}\n")
 

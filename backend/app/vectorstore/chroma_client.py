@@ -13,10 +13,11 @@ client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
 # Create a collection, and upsert the embedded chunks into the collection
 def store_chunks(embedded_chunks: list[EmbeddedChunk]
                  ) -> None:
-    
-    # Temporary workaround to ensure the collection is created fresh each time
-    client.get_or_create_collection(name=CHROMA_COLLECTION)
-    client.delete_collection(name=CHROMA_COLLECTION)
+    try:
+        client.delete_collection(name=CHROMA_COLLECTION)
+    except ValueError:
+        pass
+
     collection = client.create_collection(
         name=CHROMA_COLLECTION,
         configuration={"hnsw": {"space": "cosine"}})
@@ -28,3 +29,10 @@ def store_chunks(embedded_chunks: list[EmbeddedChunk]
             documents=[ec.chunk.text for ec in batch],
             embeddings=[ec.embedding for ec in batch],
             metadatas=[ec.chunk.metadata for ec in batch])
+
+    # Sanity check, will be moved to testing section later 
+    collection = client.get_collection(CHROMA_COLLECTION)
+    print(f"{collection.count()} chunks in collection")
+    print(collection.configuration)
+    sample = collection.get(limit=1, include=["embeddings", "metadatas"])
+    print(len(sample["embeddings"][0]), sample["metadatas"][0])

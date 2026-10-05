@@ -20,7 +20,8 @@ def update_context(context: Context,
                    heading: Tag
                    ) -> Context:
     heading_level = heading.name
-    heading_text = " ".join(heading.get_text(strip=True).split())
+    heading_text = " ".join(heading.get_text(separator=" ", strip=True).split()) 
+    # redundant but pending refactor ^^^
 
     if not heading_level or not heading_text:
         return context
