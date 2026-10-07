@@ -71,12 +71,18 @@ def clean_chapters(chapters: list[dict]
         clean_chapters_pageno_helper(soup)
 
         # Remove unwanted tags and attributes
-        for tag in soup.find_all(["script", "style", "hr", "table"]):
+        for tag in soup.find_all(["script", "style", "hr"]):
             tag.decompose()
         for footnotes in soup.find_all("div", class_="footnotes"):
             footnotes.decompose()
         for anchor in soup.find_all("a", class_="fnanchor"):
             anchor.decompose()
+
+        # Replace table tags with dummy text to flag their position in the text for later processing
+        for table_index, table in enumerate(soup.find_all("table")):
+            anchor = soup.new_tag("p")
+            anchor.string = f"<<<TABLE {table_index} from {chapter['chapter_id']}>>>"
+            table.replace_with(anchor)
 
         # Unwrap links and h4/h5 for a clean section/subsection template
         for link in soup.find_all("a"):

@@ -44,8 +44,10 @@ backend/data/chroma/
 backend/data/docs/*.txt
 backend/data/docs/raw/*
 backend/data/docs/processed/*
+backend/data/docs/curated/*
 !backend/data/docs/raw/.gitkeep
 !backend/data/docs/processed/.gitkeep
+!backend/data/docs/curated/.gitkeep
 
 
 # --- Frontend ---

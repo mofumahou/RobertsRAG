@@ -1,4 +1,5 @@
 import chromadb
+from chromadb.errors import NotFoundError
 
 from app.config import (
     CHROMA_COLLECTION,
@@ -15,7 +16,7 @@ def store_chunks(embedded_chunks: list[EmbeddedChunk]
                  ) -> None:
     try:
         client.delete_collection(name=CHROMA_COLLECTION)
-    except ValueError:
+    except NotFoundError:
         pass
 
     collection = client.create_collection(
