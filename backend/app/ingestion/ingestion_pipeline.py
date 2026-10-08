@@ -14,10 +14,13 @@ def main() -> None:
     # Temporary pipeline for processing the EPUB, chunking, embedding, and storing in Chroma
     # Runs fine so far, pending furter documentation
     epub_path = next(EPUB_DIR.glob("*.epub"), None)
+    if epub_path is None:
+        raise FileNotFoundError(f"No EPUB files found in {EPUB_DIR}")
+    
     chapters = clean_chapters(extract_html_chapters(epub_path))
     print(f"Processed {len(chapters)} chapters from {epub_path.name}\n")
 
-    chunks = chunk_chapters(chapters, CORPUS_NAME)
+    chunks = chunk_chapters(chapters, epub_path.name)
     print(f"Created {len(chunks)} chunks from {len(chapters)} chapters\n")
 
     client = OpenAI(api_key=os.getenv("NANOGPT_API_KEY"),
