@@ -39,8 +39,11 @@ def extract_html_chapters(epub_path: Path
             soup = BeautifulSoup(item.get_content(), "html.parser")
             body = soup.find("body")
 
-            if body: soup = body
-
+            if body is not None:
+                body.extract()
+                soup.clear()
+                soup.extend(list(body.contents))
+            
             match = CHAPTER_ID_RE.search(item.get_name())
             chapter_id = match.group(0) if match else item.get_id()
 
@@ -81,7 +84,7 @@ def clean_chapters(chapters: list[dict]
         # Replace table tags with dummy text to flag their position in the text for later processing
         for table_index, table in enumerate(soup.find_all("table")):
             anchor = soup.new_tag("p")
-            anchor.string = f"<<<TABLE {table_index} from {chapter['chapter_id']}>>>"
+            anchor.string = f"<<<table {table_index} {chapter['chapter_id']}>>>"
             table.replace_with(anchor)
 
         # Unwrap links and h4/h5 for a clean section/subsection template

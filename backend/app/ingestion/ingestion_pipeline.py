@@ -7,6 +7,7 @@ from app.ingestion.chunker import chunk_chapters
 from app.vectorstore.chroma_client import store_chunks
 from app.vectorstore.embedder import embed_chunks
 from tools.epub_processor import clean_chapters, extract_html_chapters
+from tools.insert_curated_tables import insert_curated_tables
 
 load_dotenv()
 
@@ -17,7 +18,7 @@ def main() -> None:
     if epub_path is None:
         raise FileNotFoundError(f"No EPUB files found in {EPUB_DIR}")
     
-    chapters = clean_chapters(extract_html_chapters(epub_path))
+    chapters = insert_curated_tables(clean_chapters(extract_html_chapters(epub_path)))
     print(f"Processed {len(chapters)} chapters from {epub_path.name}\n")
 
     chunks = chunk_chapters(chapters, epub_path.name)

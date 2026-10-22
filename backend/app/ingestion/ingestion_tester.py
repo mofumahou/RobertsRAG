@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 
 from app.config import EPUB_DIR
 from app.ingestion.chunker import chunk_chapter
+from tools.insert_curated_tables import insert_curated_tables
 from tools.epub_processor import clean_chapters, extract_html_chapters
 
 load_dotenv()
@@ -11,10 +12,11 @@ def main() -> None:
     if epub_path is None:
         raise FileNotFoundError(f"No EPUB files found in {EPUB_DIR}")
 
-    chapters = clean_chapters(extract_html_chapters(epub_path))
+    chapters = insert_curated_tables(clean_chapters(extract_html_chapters(epub_path)))
     print(f"Processed {len(chapters)} chapters from {epub_path.name}\n")
 
     for chapter in chapters:
+        print(chapter["soup"])
         chunks = chunk_chapter(
             chapter["soup"],
             chapter["chapter_id"],

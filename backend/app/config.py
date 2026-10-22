@@ -7,6 +7,7 @@ CORPUS_NAME = "Robert's Rules of Order, 1915 Edition"
 # <---- Paths ---->
 CORPUS_DIR = BACKEND_DIR / "data" / "docs" / "processed"
 EPUB_DIR = BACKEND_DIR / "data" / "docs" / "raw"
+CURATED_DIR = BACKEND_DIR / "data" / "docs" / "curated"
 
 # <---- Vector Store ---->
 CHROMA_DB_DIR = BACKEND_DIR / "data" / "chroma"
