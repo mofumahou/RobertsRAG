@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup as Soup
 from typing import Any
 
+# Series of dataclasses to maintain consistency and structure of chunks and the context in which they are created.
 @dataclass(frozen=True)
 class Chunk:
     chunk_id: str

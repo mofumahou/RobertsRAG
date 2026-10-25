@@ -4,10 +4,13 @@ from app.config import CURATED_DIR
 
 TABLE_RE = re.compile(r"<<<(table \d+ h-\d+)>>>")
 
+# Goes through the cleaned chapters and replaces placeholders with their respective curated table files' text.
 def insert_curated_tables(chapters: list[dict]) -> list[dict]:
     for chapter in chapters:
         soup = chapter["soup"]
 
+        # Since it is a 1-1 match between the placeholder and the curated table file, we can use a regex to 
+        #     find the placeholders and replace them with the text from the corresponding file.
         for placeholder in soup.find_all("p"):
             match = TABLE_RE.fullmatch(placeholder.get_text(strip=True))
             if match is None:
@@ -26,9 +29,12 @@ def insert_curated_tables(chapters: list[dict]) -> list[dict]:
             paragraph = soup.new_tag("p")
             paragraph.string = table_text
             placeholder.replace_with(paragraph)
+    
+    # Runs the debugging function, temporary measure
     save_modified_chapters(chapters, CURATED_DIR / "debug_output")
     return chapters
 
+# Debugging function to save the modified chapters with the inserted curated tables to a specified output directory.
 def save_modified_chapters(chapters: list[dict],
                            output_dir: Path
                            ) -> None:

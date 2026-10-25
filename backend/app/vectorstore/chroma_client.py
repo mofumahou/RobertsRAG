@@ -11,7 +11,7 @@ from app.ingestion.models import EmbeddedChunk
 # Initialize a persistent ChromaDB client
 client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
 
-# Create a collection, and upsert the embedded chunks into the collection
+# Delete a collection if already present, create a new collection, and store the embedded chunks in the collection.
 def store_chunks(embedded_chunks: list[EmbeddedChunk]
                  ) -> None:
     try:
